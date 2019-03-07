@@ -1,0 +1,19 @@
+{
+  "name": "books",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "nodemon book.js",
+    "dev": "nodemon book.js"
+  },
+  "engines": {
+    "node": "10.13.0",
+    "npm": "6.4.1"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "mongoose": "^5.4.15",
+    "nodemon": "^1.18.10"
+  }
+}
