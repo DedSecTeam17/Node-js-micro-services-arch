@@ -3,14 +3,14 @@ const app = express();
 const mongoose = require('mongoose');
 const bodyParser = require("body-parser");
 const Book = require('./models/book');
-
+require('dotenv').load();
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json({type: 'application/*+json'}));
 
 
-app.listen(4545, () => {
-    mongoose.connect('mongodb://admin:mohamed1337@ds349045.mlab.com:49045/books_service', {useNewUrlParser: true});
+app.listen(process.env.PORT, () => {
+    mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser: true});
     console.log("Test");
 });
 
@@ -28,7 +28,7 @@ app.get('/book', async (req, res) => {
     }
 
 
-    res.send("Asd");
+
 });
 
 
@@ -75,7 +75,7 @@ app.put('/book/:_id', async (req, res) => {
 });
 
 
-app.del('/book/:_id', async (req, res) => {
+app.delete('/book/:_id', async (req, res) => {
     try {
         const book = await Book.findOneAndRemove({_id: req.params._id});
         sendJsonResponse(res, null, 402);
