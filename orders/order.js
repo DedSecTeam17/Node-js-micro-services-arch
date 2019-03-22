@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const  axios=require('axios');
 require('dotenv').load();
 
 const  Order=require('./models/order');
@@ -32,8 +33,49 @@ app.get('/orders' , async  (req,res)=>{
 
 app.get('/order/:id' ,async  (req,res)=>{
     try {
+
+        // how to combine  3 different service into one service
+
         const  order=await  Order.findById({_id: req.params.id});
-        sendJsonResponse(res,order , 200);
+        const customer= await  axios.get("http://localhost:5555/customers/"+order.customer_id);
+        const book= await  axios.get("http://localhost:4545/book/"+order.book_id);
+
+
+        const  response={
+            customer_name : customer.data.name,
+            customer_id : customer.data._id,
+            order_id : order._id,
+            book_title :book.data.title,
+            book_author :book.data.author,
+        };
+        sendJsonResponse(res,response, 200);
+    }catch (e) {
+        sendJsonResponse(res,e.message , 404);
+    }
+});
+
+// get order by customer id
+app.get('/order/customer/:customer_id' ,async  (req,res)=>{
+    try {
+
+        const  order=await  Order.find({customer_id: mongoose.Types.ObjectId(req.params.customer_id)});
+
+        sendJsonResponse(res,order, 200);
+    }catch (e) {
+        sendJsonResponse(res,e.message , 404);
+    }
+});
+
+
+
+
+// get order by book id
+app.get('/order/book/:book_id' ,async  (req,res)=>{
+    try {
+
+        const  order=await  Order.find({book_id: mongoose.Types.ObjectId(req.params.book_id)});
+
+        sendJsonResponse(res,order, 200);
     }catch (e) {
         sendJsonResponse(res,e.message , 404);
     }
@@ -66,6 +108,8 @@ app.put('/order/:id' , async  (req,res)=>{
 
     try {
         const  order=await  Order.findOneAndUpdate({_id:req.params.id},req.body);
+
+
         sendJsonResponse(res,"Updated Successfully" , 201);
     }catch (e) {
         sendJsonResponse(res,e.message , 404);

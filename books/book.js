@@ -3,6 +3,7 @@ const app = express();
 const mongoose = require('mongoose');
 const bodyParser = require("body-parser");
 const Book = require('./models/book');
+const  axios=require('axios');
 require('dotenv').load();
 
 app.use(bodyParser.urlencoded({extended: false}));
@@ -76,17 +77,46 @@ app.put('/book/:_id', async (req, res) => {
 
 
 app.delete('/book/:_id', async (req, res) => {
+    axios.get('http://localhost:6666/order/book/' + mongoose.Types.ObjectId(req.params._id)).then(async (response) => {
+        console.log( response.data);
+
+        // integrity
+        if (response.data.length!==0) {
+            console.log( "w");
+            sendJsonResponse(res, {
+                message: "integrity constraint violation this customer used by order service delete order first then delete the customer"
+            }, 404);
+        } else {
+
+            sendJsonResponse(res,"", 200);
+            // await deleteBook(req.params._id, res);
+        }
+    })
+        .catch(async (err) => {
+            //    no order found you can delete it
+            // await deleteBook(req.params._id, res);
+            sendJsonResponse(res,err, 200);
+
+        });
+
+
+
+
+
+
+});
+
+
+async  function  deleteBook(id,res) {
     try {
-        const book = await Book.findOneAndRemove({_id: req.params._id});
+        const book = await Book.findOneAndRemove({_id: id});
         sendJsonResponse(res, null, 402);
-        next();
+
     } catch (e) {
         sendJsonResponse(res, "error", 404);
 
     }
-
-});
-
+}
 
 function sendJsonResponse(res, data, status) {
     res.status(status);
